@@ -1,4 +1,4 @@
-package cmb.ibm.myOil;
+package com.myOil;
 
 /**
  * Hello world!
