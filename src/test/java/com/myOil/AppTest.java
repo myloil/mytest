@@ -1,4 +1,4 @@
-package cmb.ibm.test4U;
+package com.myOil;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
