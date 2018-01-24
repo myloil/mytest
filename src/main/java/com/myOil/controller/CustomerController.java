@@ -25,4 +25,13 @@ public class CustomerController {
 		resultMap.put("message", "getCustomerList");
 		return resultMap;
 	}
+	
+	@RequestMapping(value = "/getCustomerListA", method = RequestMethod.GET)
+	public Map getCustomerListA() {
+		// User u = userService.checkLoginUser(userName, userPassword);
+		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+		resultMap.put("status", 200);
+		resultMap.put("message", "getCustomerListA");
+		return resultMap;
+	}
 }

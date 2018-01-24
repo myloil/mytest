@@ -7,6 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.Filter;
+
 import org.apache.shiro.cache.ehcache.EhCacheManager;
 import org.apache.shiro.spring.LifecycleBeanPostProcessor;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.apache.shiro.mgt.SecurityManager;
+
 import com.myOil.entity.Authority;
 import com.myOil.service.UserService;
 
@@ -26,7 +29,7 @@ import com.myOil.service.UserService;
  */
 @Configuration
 public class ShiroConfig {
-	
+
 	@Autowired
 	private UserService userService;
 	
@@ -75,36 +78,34 @@ public class ShiroConfig {
 		return new AuthorizationAttributeSourceAdvisor();
 	}
 
+	/*@Bean
+	public AnyOfRolesAuthorizationFilter myRoleFilter() {
+		AnyOfRolesAuthorizationFilter myRole = 
+		return myRole;
+	}*/
 	@Bean
 	public ShiroFilterFactoryBean shiroFilter(SecurityManager securityManager) {
 		ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
 		shiroFilterFactoryBean.setSecurityManager(securityManager);  
 		shiroFilterFactoryBean.setLoginUrl("/");
 		shiroFilterFactoryBean.setSuccessUrl("/sa/index");
-
+		AnyOfRolesAuthorizationFilter myRoleFilter = new AnyOfRolesAuthorizationFilter();
+		Map<String, Filter> myFilter = new LinkedHashMap<String, Filter>();
+		myFilter.put("myRoles", myRoleFilter);
+		shiroFilterFactoryBean.setFilters(myFilter);
+		
 		Map<String, String> filterChainDefinitionMap = new LinkedHashMap<String, String>();
 		// <!-- 过滤链定义，从上向下顺序执行，一般将 /**放在最为下边 -->:这是一个坑呢，一不小心代码就不好使了;
         // <!-- authc:所有url都必须认证通过才可以访问; anon:所有url都都可以匿名访问-->
         filterChainDefinitionMap.put("/user/login", "anon");//anon 可以理解为不拦截
 
-//		filterChainDefinitionMap.put("/user/list/getAllUsers", "roles[getAllUsers]");
-       /* List<Resources> resourcesList = resourcesService.queryAll();
-        for(Resources resources:resourcesList){
-
-           if (StringUtil.isNotEmpty(resources.getResurl())) {
-               String permission = "perms[" + resources.getResurl()+ "]";
-               filterChainDefinitionMap.put(resources.getResurl(),permission);
-           }
-       }*/
-
-//        filterChainDefinitionMap.put("/**", "authc");
 		Map<String, Set<Authority>> mp = userService.getUserAllAuthorityMap();
 		for (Map.Entry<String, Set<Authority>> entry : mp.entrySet()) {
 			String key = entry.getKey();
 			Set<Authority> authoritySet = entry.getValue();
 			for (Authority au : authoritySet) {
 				if(!filterChainDefinitionMap.containsKey("/"+au.getAuthorityUrl())){
-					filterChainDefinitionMap.put("/"+au.getAuthorityUrl(),"roles[" + key + "]");
+					filterChainDefinitionMap.put("/"+au.getAuthorityUrl(),"authc,myRoles[" + key + "]");
 				}else{
 					StringBuffer tmpRole = new StringBuffer(filterChainDefinitionMap.get("/"+au.getAuthorityUrl()));
 					tmpRole.deleteCharAt(tmpRole.length()-1);
@@ -115,6 +116,7 @@ public class ShiroConfig {
 				
 			}
 		}
+
 		filterChainDefinitionMap.put("/**", "authc");
 		
 		

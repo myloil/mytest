@@ -37,10 +37,8 @@ public class MyRealm extends AuthorizingRealm {
 		User token = (User) principals.getPrimaryPrincipal();
 		int departmentId = token.getDepartmentId();
 		SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
-
-		Set<String> roleSet = new HashSet<String>();
-		Set<String> permissionSet = new HashSet<String>();
-		Map<String, Set<Authority>> mp = userService.getUserAuthorityMapByDepartmentId(departmentId);
+		info.addRole(String.valueOf(departmentId));
+		/*Map<String, Set<Authority>> mp = userService.getUserAuthorityMapByDepartmentId(departmentId);
 		for (Map.Entry<String, Set<Authority>> entry : mp.entrySet()) {
 			String key = entry.getKey();
 			Set<Authority> authoritySet = entry.getValue();
@@ -48,10 +46,8 @@ public class MyRealm extends AuthorizingRealm {
 			for (Authority au : authoritySet) {
 				info.addStringPermission("/"+au.getAuthorityUrl());
 			}
-		}
+		}*/
 
-		info.setRoles(roleSet);
-		info.setStringPermissions(permissionSet);
 		return info;
 	}
 
