@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan
 @EnableAutoConfiguration
 @EnableCaching 
-@SpringBootApplication(scanBasePackages = {"com.myOil.dao","com.myOil.service", "com.myOil.controller"}) 
+@SpringBootApplication
 public class MyOilApplication {
 
 	public static void main(String[] args) {
