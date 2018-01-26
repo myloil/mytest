@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authc.UsernamePasswordToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.myOil.entity.Authority;
 import com.myOil.entity.User;
 import com.myOil.service.UserService;
+import com.myOil.util.EncryptUtil;
 
 /**
  * @author Shuai.yang
@@ -35,13 +37,20 @@ public class UserController {
 	
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public Map login(@RequestParam("userName") String userName,
-			@RequestParam("userPassword") String userPassword) throws UnsupportedEncodingException {
+			@RequestParam("userPassword") String userPassword) {
 		// User u = userService.checkLoginUser(userName, userPassword);
 		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
-		UsernamePasswordToken token = new UsernamePasswordToken(userName,URLEncoder.encode(userPassword,"utf-8"));
-		SecurityUtils.getSubject().login(token);
-		resultMap.put("status", 200);
-		resultMap.put("message",SecurityUtils.getSubject().getPrincipal());
+		try{
+			UsernamePasswordToken token = new UsernamePasswordToken(userName,EncryptUtil.encrypt(userPassword));
+			SecurityUtils.getSubject().login(token);
+			resultMap.put("status", 200);
+			resultMap.put("message",SecurityUtils.getSubject().getPrincipal());
+		}catch(UnknownAccountException u){
+			resultMap.put("status", 300);
+			resultMap.put("message","UnknownAccountException");
+			u.printStackTrace();
+		} 
+		
 		return resultMap;
 	}
 	
